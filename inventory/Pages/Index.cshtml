@@ -25,21 +25,21 @@
             {
                 <tr>
                     <td>
-                        @Html.DisplayFor(m=>book.Name)
+                        @Html.DisplayFor(m => book.Name)
                     </td>
                     <td>
-                        @Html.DisplayFor(m=>book.Author)
+                        @Html.DisplayFor(m => book.Author)
                     </td>
                     <td>
-                        @Html.DisplayFor(m=>book.Pages)
+                        @Html.DisplayFor(m => book.Pages)
                     </td>
                     <td>
-                        @Html.DisplayFor(m=>book.Price)
+                        @Html.DisplayFor(m => book.Price)
                     </td>
                     <td>
                         <form asp-page-handler="saveInventory" method="post">
                             <input type="hidden" name="bookId" value="@book.ID" />
-                            @Html.TextBoxFor(m=>book.InStock)
+                            @Html.TextBoxFor(m => book.InStock)
                             <button>Save</button>
                         </form>
                     </td>
@@ -47,12 +47,14 @@
             }
         </table>
     }
-    else  {
-        <br/>
+    else
+    {
+        <br />
         <h2 class="display-7">Nothing to see here folks :-)</h2>
     }
 
-    @if (ViewData["Error"]!=null)  {
+    @if (ViewData["Error"] != null)
+    {
         <p style='color: red'>@ViewData["Error"]</p>
     }
 </div>

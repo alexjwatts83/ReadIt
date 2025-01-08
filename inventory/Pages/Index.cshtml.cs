@@ -18,13 +18,13 @@ namespace inventory.Pages
         public IndexModel(ILogger<IndexModel> logger, BookContext context)
         {
             _logger = logger;
-            _context=context;
+            _context = context;
         }
 
         public void OnGet()
         {
-            List<Book> books=null;
-            
+            List<Book> books = null;
+
             // UNCOMMENT AFTER SETTING THE CONNECTION STRING
             // try  {
             //     books=_context.Books.ToList();
@@ -32,18 +32,19 @@ namespace inventory.Pages
             // catch (Exception ex)  {
             //     ViewData["Error"]=ex.Message;
             // }
-            ViewData["books"]=books;
+            ViewData["books"] = books;
 
         }
 
-        public IActionResult OnPostSaveInventory()  {
-            var bookId=int.Parse(Request.Form["bookId"]);
-            var quantity=int.Parse(Request.Form["book.InStock"]);
-            var book=_context.Books.Find(bookId);
-            book.InStock=quantity;
-            _context.SaveChanges();           
+        public IActionResult OnPostSaveInventory()
+        {
+            var bookId = int.Parse(Request.Form["bookId"]);
+            var quantity = int.Parse(Request.Form["book.InStock"]);
+            var book = _context.Books.Find(bookId);
+            book.InStock = quantity;
+            _context.SaveChanges();
 
             return RedirectToPage();
-        }      
+        }
     }
 }
