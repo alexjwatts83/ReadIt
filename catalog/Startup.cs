@@ -11,7 +11,7 @@ namespace catalog
     public class Startup
     {
         // CHANGE THIS TO false WHEN MIGRATING TO AZURE SQL
-        private bool useInMemory = true;
+        private bool useInMemory = false;
 
         public Startup(IConfiguration configuration)
         {
