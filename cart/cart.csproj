@@ -2,10 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <UserSecretsId>0f024bcb-332a-4b98-bac8-a8e13b1e3118</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.22.1"/>
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.22.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

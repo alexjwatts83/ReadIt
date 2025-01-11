@@ -21,89 +21,97 @@ namespace cart.Pages
         private readonly BookContext _context;
         private readonly IConfiguration _config;
 
-        public IndexModel(ILogger<IndexModel> logger, IConfiguration config , BookContext context)
+        public IndexModel(ILogger<IndexModel> logger, IConfiguration config, BookContext context)
         {
             _logger = logger;
-            _context=context;   
-            _config=config;        
+            _context = context;
+            _config = config;
         }
 
         public void OnGet()
         {
 
-            List<Book> books=new List<Book>();
+            List<Book> books = new List<Book>();
 
             // UNCOMMENT AFTER WE HAVE A DATABASE  
-            //books=GetBooksInShoppingCart();
+            books = GetBooksInShoppingCart();
 
-            ViewData["books"]=books;
+            ViewData["books"] = books;
         }
 
-        public IActionResult OnPostRemoveFromShoppingCart()  {
-            var bookId=int.Parse(Request.Form["bookId"]);
-            var book=_context.Books.Find(bookId);
+        public IActionResult OnPostRemoveFromShoppingCart()
+        {
+            var bookId = int.Parse(Request.Form["bookId"]);
+            var book = _context.Books.Find(bookId);
             book.InStock++;
             _context.SaveChanges();
-            
-            var client=GetRedisClient();
-            client.RemoveItemFromList("cart", bookId.ToString());            
+
+            var client = GetRedisClient();
+            client.RemoveItemFromList("cart", bookId.ToString());
 
             return RedirectToPage();
-        }  
+        }
 
-        public void OnPostPlaceOrder()  {
-            
-            var booksInCart=GetBooksInShoppingCart();
-            var order=new Order();
-            double total=0;
-            order.orderDate=DateTime.Now;
-            order.priority=1;
-            order.items=new List<OrderItem>();
+        public void OnPostPlaceOrder()
+        {
 
-            foreach (var book in booksInCart)  {
-                var item=new OrderItem();
-                item.name=book.Name;
-                item.id=book.ID;
-                item.price=book.Price;
-                total+=item.price;
+            var booksInCart = GetBooksInShoppingCart();
+            var order = new Order();
+            double total = 0;
+            order.orderDate = DateTime.Now;
+            order.priority = 1;
+            order.items = new List<OrderItem>();
+
+            foreach (var book in booksInCart)
+            {
+                var item = new OrderItem();
+                item.name = book.Name;
+                item.id = book.ID;
+                item.price = book.Price;
+                total += item.price;
                 order.items.Add(item);
             }
 
-            order.total=total;
+            order.total = total;
 
-            var json=JsonConvert.SerializeObject(order);
+            var json = JsonConvert.SerializeObject(order);
 
             Console.WriteLine(json);
 
-            try  {
-            var client=new HttpClient();
-            var result=client.PostAsync(_config.GetValue<String>("OrderFunctionUrl"),new StringContent(json)).Result;
-                     
-            Console.WriteLine("Order sent, status:" + result);
+            try
+            {
+                var client = new HttpClient();
+                var result = client.PostAsync(_config.GetValue<String>("OrderFunctionUrl"), new StringContent(json)).Result;
 
-            if (result.StatusCode==System.Net.HttpStatusCode.NoContent)  {
-                ClearCart();
+                Console.WriteLine("Order sent, status:" + result);
+
+                if (result.StatusCode == System.Net.HttpStatusCode.NoContent)
+                {
+                    ClearCart();
+                }
+
+                ViewData["books"] = new List<Book>();
+                ViewData["OrderStatus"] = "sent";
             }
-
-            ViewData["books"]=new List<Book>();
-            ViewData["OrderStatus"]="sent";
+            catch (Exception ex)
+            {
+                ViewData["OrderStatus"] = "Error sending order: " + ex.Message;
             }
-            catch (Exception ex)  {
-                ViewData["OrderStatus"]="Error sending order: " + ex.Message;
-            }
-        }         
-
-        private List<Book> GetBooksInShoppingCart()  {
-
-            var client=GetRedisClient();
-            var bookIDs=client.GetAllItemsFromList("cart");
-                 
-            return _context.Books.Where(b=>bookIDs.Contains(b.ID.ToString())).ToList();
         }
 
-        private void ClearCart()  {
+        private List<Book> GetBooksInShoppingCart()
+        {
 
-            var client=GetRedisClient();
+            var client = GetRedisClient();
+            var bookIDs = client.GetAllItemsFromList("cart");
+
+            return _context.Books.Where(b => bookIDs.Contains(b.ID.ToString())).ToList();
+        }
+
+        private void ClearCart()
+        {
+
+            var client = GetRedisClient();
             client.RemoveAllFromList("cart");
         }
 
@@ -115,20 +123,22 @@ namespace cart.Pages
         }
     }
 
-    class Order  {
-        public int orderId  {get; set;}
-        public DateTime orderDate  {get; set;}
+    class Order
+    {
+        public int orderId { get; set; }
+        public DateTime orderDate { get; set; }
         public double total { get; set; }
-        public int priority  {get; set;}
+        public int priority { get; set; }
         public List<OrderItem> items { get; set; }
 
         public Order()
         {
-            orderId=new Random().Next(1000);
+            orderId = new Random().Next(1000);
         }
     }
 
-    class OrderItem  {
+    class OrderItem
+    {
         public String name { get; set; }
         public int id { get; set; }
         public double price { get; set; }
