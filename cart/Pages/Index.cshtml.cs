@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using cart.Data;
 using cart.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -59,7 +62,6 @@ namespace cart.Pages
             var order = new Order();
             double total = 0;
             order.orderDate = DateTime.Now;
-            order.priority = 1;
             order.items = new List<OrderItem>();
 
             foreach (var book in booksInCart)
@@ -80,15 +82,20 @@ namespace cart.Pages
 
             try
             {
-                var client = new HttpClient();
-                var result = client.PostAsync(_config.GetValue<String>("OrderFunctionUrl"), new StringContent(json)).Result;
+                string storageConnection = _config.GetValue<String>("StorageConnectionString");
+                var blobService = new BlobServiceClient(storageConnection);
+                var container = blobService.GetBlobContainerClient("neworders");
+                var blobClient = container.GetBlobClient($"order_{Guid.NewGuid().ToString()}.json");
 
-                Console.WriteLine("Order sent, status:" + result);
+                // Prepare stream for upload
+                byte[] byteArray = Encoding.ASCII.GetBytes(json);
+                MemoryStream stream = new MemoryStream(byteArray);
 
-                if (result.StatusCode == System.Net.HttpStatusCode.NoContent)
-                {
-                    ClearCart();
-                }
+                var resp = blobClient.Upload(stream);
+
+                Console.WriteLine("Order sent!");
+
+                ClearCart();
 
                 ViewData["books"] = new List<Book>();
                 ViewData["OrderStatus"] = "sent";
@@ -97,6 +104,12 @@ namespace cart.Pages
             {
                 ViewData["OrderStatus"] = "Error sending order: " + ex.Message;
             }
+        }
+
+        public IActionResult OnPostLoad()
+        {
+            BookLoader.LoadBooks(_context);
+            return RedirectToPage();
         }
 
         private List<Book> GetBooksInShoppingCart()
@@ -128,7 +141,6 @@ namespace cart.Pages
         public int orderId { get; set; }
         public DateTime orderDate { get; set; }
         public double total { get; set; }
-        public int priority { get; set; }
         public List<OrderItem> items { get; set; }
 
         public Order()

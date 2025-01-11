@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: readit-cart
-        image: readitawattsacr.azurecr.io/cart:v1
+        image: readitawattsacr.azurecr.io/cart:v2
         resources:
           limits:
             memory: "128Mi"
