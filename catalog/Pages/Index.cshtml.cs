@@ -27,41 +27,43 @@ namespace catalog.Pages
 
         public void OnGet()
         {
-            var books=new List<Book>();
+            var books = new List<Book>();
 
-            try  {
+            try
+            {
                 books = _context.Books.ToList();
             }
-            catch (Exception ex)  {
-                ViewData["Error"]=ex.Message;
+            catch (Exception ex)
+            {
+                ViewData["Error"] = ex.Message;
                 ViewData["books"] = books;
                 return;
             }
-            
+
             // UNCOMMENT AFTER ADDING REDIS
             //Get data about the shopping cart
-            //var client = GetRedisClient();
-            //var cartItems = client.GetListCount("cart");
-            //ViewData["cartNo"] = cartItems;
+            var client = GetRedisClient();
+            var cartItems = client.GetListCount("cart");
+            ViewData["cartNo"] = cartItems;
 
             ViewData["books"] = books;
-            
+
         }
 
         public IActionResult OnPostAddToShoppingCart()
         {
             // UNCOMMECT AFTER ADDING REDIS
-            // var client = GetRedisClient();
-            // var bookId = int.Parse(Request.Form["bookId"]);
-                
-            // if (!client.GetAllItemsFromList("cart").Contains(bookId.ToString()))
-            // {
-            //     var book = _context.Books.Find(bookId);
-            //     book.InStock--;
-            //     _context.SaveChanges();
-            
-            //     client.AddItemToList("cart", bookId.ToString());
-            // }
+            var client = GetRedisClient();
+            var bookId = int.Parse(Request.Form["bookId"]);
+
+            if (!client.GetAllItemsFromList("cart").Contains(bookId.ToString()))
+            {
+                var book = _context.Books.Find(bookId);
+                book.InStock--;
+                _context.SaveChanges();
+
+                client.AddItemToList("cart", bookId.ToString());
+            }
 
             return RedirectToPage();
         }

@@ -19,6 +19,8 @@ namespace AzureCourse.Function
         public object Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req)
         {
+            _logger.LogInformation($"Newly called: {Guid.NewGuid()}");
+
             string requestBody = new StreamReader(req.Body).ReadToEndAsync().Result;
 
             _logger.LogInformation($"Order JSON: {requestBody}");
