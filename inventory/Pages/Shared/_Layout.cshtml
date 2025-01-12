@@ -14,6 +14,19 @@
                 <img width="100" src="~/images/logo.jpg"/>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <H4>Inventory</H4>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>Hello @User.Claims.First(c=>c.Type=="name").Value!
+                        </li>                        
+                    </ul>
+                }
+                else
+                {
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>Anonymous User</li>
+                    </ul>
+                }
             </div>
         </nav>
     </header>
